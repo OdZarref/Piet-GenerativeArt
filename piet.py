@@ -1,5 +1,9 @@
+import tweepy
+import schedule
 from PIL import Image
 from random import randint, choice
+from tokens import *
+from time import sleep
 
 class Piet:
     def createImageSquared(self):
@@ -37,10 +41,7 @@ class Piet:
         def howMuchToTheBottomFunction(index):
             multFifteen = multFifteenFunction(index)
             howMuch = randint(0, (multFifteen - (index)))
-            print(howMuch)
-
-            if howMuch > 8:
-                howMuch = 0
+            if howMuch > 8: howMuch = 0
 
             return howMuch
 
@@ -68,6 +69,26 @@ class Piet:
 
         image.save('image.jpg')
 
-if __name__ == '__main__':
+class Twitter:
+    def __init__(self):
+        self.auth = tweepy.OAuthHandler(apiKey, apiKeySecret)
+        self.auth.set_access_token(accessToken, accessTokenSecret)
+        self.api = tweepy.API(self.auth)
+
+    def postTweet(self):
+        imagePath = 'image.jpg'
+        status = ''
+        self.api.update_with_media(imagePath, status)
+
+def runScript():
     piet = Piet()
     piet.createImage()
+    twitterApi = Twitter()
+    twitterApi.postTweet()
+
+if __name__ == '__main__':
+    schedule.every(2).hours.do(runScript)
+
+    while True:
+        schedule.run_pending()
+        sleep(2)
