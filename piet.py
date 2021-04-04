@@ -4,70 +4,54 @@ from PIL import Image
 from random import randint, choice
 from tokens import *
 from time import sleep
+from math import floor
+from config import *
 
 class Piet:
-    def createImageSquared(self):
-        from config import colors
-
-        image = Image.new('RGB', (1580, 1580), color = (1, 1, 1))
-        placeHorizontal = 0
-        placeVertical = 0
-        shapeSize = (300, 300)
-
-        for _ in range(5):
-            for _ in range(5):
-                imageToPaste = Image.new('RGB', (shapeSize[0], shapeSize[1]), color = (choice(colors)))
-                image.paste(imageToPaste, (placeHorizontal, placeVertical))
-                placeVertical = placeVertical + 300 + 20
-                image.save('image.jpg')
-
-            placeHorizontal = placeHorizontal + 300 + 20
-            placeVertical = 0
-
     def createImage(self):
-        def paint(color, edge):
-            imageToPaste = Image.new('RGB', (100, 100), color = (imageToPasteColor))
-            image.paste(imageToPaste, (edge))
+        def split(self, edge, width, height):
+            splitOnVertical = choice((True, False))
 
-        def multFifteenFunction(index):
-            result = 0
+            if splitOnVertical:
+                whereToSplit = randint(0, width-50)
+                newWidth = width - whereToSplit
+                newWidth2 = width - newWidth
+                whereToDraw = edge[:]
+                whereToDraw2 = (newWidth, edge[-1])
+                print(f'figura 1: Vertical = Sim, Comprimento = {newWidth}x{height}, Posição = {whereToDraw}')
+                print(f'figura 2: Vertical = Sim, Comprimento = {newWidth2}x{height}, Posição = {whereToDraw2}')
+                draw(self, whereToDraw, newWidth, height)
+                draw(self, whereToDraw2, newWidth2, height)
+                if not whereToDraw in edgers: edgers.append(whereToDraw)
+                if not whereToDraw2 in edgers: edgers.append(whereToDraw2)
+            else:
+                whereToSplit = randint(0, height-50)
+                newHeight = height - whereToSplit
+                newHeight2 = height - newHeight
+                whereToDraw = edge[:]
+                whereToDraw2 = (edge[0], newHeight)
+                print(f'figura 1: Vertical = Não, Comprimento = {width}x{newHeight}, Posição = {whereToDraw}')
+                print(f'figura 2: Vertical = Não, Comprimento = {width}x{newHeight2}, Posição = {whereToDraw2}')
+                draw(self, whereToDraw, width, newHeight)
+                draw(self, whereToDraw2, width, newHeight2)
+                if not whereToDraw in edgers: edgers.append(whereToDraw)
+                if not whereToDraw2 in edgers: edgers.append(whereToDraw2)
 
-            while True:
-                if result % 15 == 0 and result > index:
-                    return result
-                else:
-                    result += 5
+        def draw(self, whereToDraw, width, height):
+            colorToPaint = (randint(0, 255), randint(0, 255), randint(0, 255))
+            imageToPaste = Image.new('RGB', (width, height), color = colorToPaint)
+            image.paste(imageToPaste, whereToDraw)
+            image.save('image.jpg')
 
-        def howMuchToTheBottomFunction(index):
-            multFifteen = multFifteenFunction(index)
-            howMuch = randint(0, (multFifteen - (index)))
-            if howMuch > 8: howMuch = 0
+        width = 1500
+        height = 1500
+        edgers = [(0, 0)]
+        image = Image.new('RGB', (width, height), color = (1, 1, 1))
 
-            return howMuch
-
-        def paintToTheBottom(howMuchToTheBottom, color, index):
-            for c in range(howMuchToTheBottom):
-                if not edgers[index] == edgers[-1]:
-                    paint(color, edgers[index + c])
-                    mustBeIgnored.append(index + c)
-
-        from config import edgers, colors
-
-        image = Image.new('RGB', (1500, 1500), color = (1, 1, 1))
-        mustBeIgnored = list()
-
-        for edge in edgers:
-            index = edgers.index(edge)
-
-            if index not in mustBeIgnored:
-                howMuchToTheBottom = howMuchToTheBottomFunction(index)
-                imageToPasteColor = choice(colors)
-                paint(imageToPasteColor, edge)
-
-                if not index == 224:
-                    paintToTheBottom(howMuchToTheBottom, imageToPasteColor, index)
-
-        image.save('image.jpg')
+        for index in range(randint(5, 8)):
+            split(self, choice(edgers), width, height)
+            print(edgers)
+            input()
 
 class Twitter:
     def __init__(self):
@@ -83,12 +67,14 @@ class Twitter:
 def runScript():
     piet = Piet()
     piet.createImage()
-    twitterApi = Twitter()
-    twitterApi.postTweet()
+    # twitterApi = Twitter()
+    # twitterApi.postTweet()
 
 if __name__ == '__main__':
-    schedule.every(2).hours.do(runScript)
+    # schedule.every(2).hours.do(runScript)
+    #
+    # while True:
+    #     schedule.run_pending()
+    #     sleep(2)
 
-    while True:
-        schedule.run_pending()
-        sleep(2)
+    runScript()
