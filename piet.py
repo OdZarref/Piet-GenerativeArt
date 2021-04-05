@@ -8,6 +8,12 @@ from math import floor
 from config import *
 
 class Piet:
+    def draw(self, pos, width, height, image):
+        colorToPaint = (randint(0, 255), randint(0, 255), randint(0, 255))
+        imageToPaste = Image.new('RGB', (width, height), color = colorToPaint)
+        image.paste(imageToPaste, pos)
+        image.save(f'image.jpg')
+
     def createImage(self):
         def split(self, activeFrame):
             splitOnVertical = choice((True, False))
@@ -44,12 +50,6 @@ class Piet:
 
             activeFrame['ignore'] = True
 
-        def draw(self, pos, width, height):
-            colorToPaint = (randint(0, 255), randint(0, 255), randint(0, 255))
-            imageToPaste = Image.new('RGB', (width, height), color = colorToPaint)
-            image.paste(imageToPaste, pos)
-            image.save(f'image.jpg')
-
         frames = [{'pos': (0, 0), 'width': 1500, 'height': 1500, 'ignore': False}]
         image = Image.new('RGB', (frames[0]['width'], frames[0]['height']), color = (randint(0, 255), randint(0, 255), randint(0, 255)))
 
@@ -66,6 +66,32 @@ class Piet:
             split(self, activeFrame)
             input()
 
+    def createSimpleArt(self):
+        from math import ceil
+        def drawSimpleArt(self, pos, width, height, image):
+            colors = [(105, 60, 114), (193, 80, 80), (217, 118, 66), (212, 157, 66)]
+            colorToPaint = choice(colors)
+            imageToPaste = Image.new('RGB', (width, height), color = colorToPaint)
+            image.paste(imageToPaste, pos)
+
+        width = 2000
+        height = 1500
+        horizontalPosition = 0
+        imageColor = (randint(0, 255), randint(0, 255), randint(0, 255))
+        image = Image.new('RGB', (width, height), color = imageColor)
+        drawSimpleArt(self, (horizontalPosition, 0), width, height, image)
+
+        while True:
+            if width < 50:
+                drawSimpleArt(self, (2000 - width, 0), width, height, image)
+                break
+            split = randint(0, ceil(width / randint(2, 4)))
+            width -= split
+            horizontalPosition += split
+            drawSimpleArt(self, (horizontalPosition, 0), width, height, image)
+
+        image.save(f'image.jpg')
+
 class Twitter:
     def __init__(self):
         self.auth = tweepy.OAuthHandler(apiKey, apiKeySecret)
@@ -79,17 +105,13 @@ class Twitter:
 
 def runScript():
     piet = Piet()
-    piet.createImage()
-    # twitterApi = Twitter()
-    # twitterApi.postTweet()
+    piet.createSimpleArt()
+    twitterApi = Twitter()
+    twitterApi.postTweet()
 
 if __name__ == '__main__':
-    # schedule.every(2).hours.do(runScript)
-    #
-    # while True:
-    #     schedule.run_pending()
-    #     sleep(2)
+    schedule.every(24).hours.do(runScript)
 
     while True:
-        runScript()
-        sleep(1)
+        schedule.run_pending()
+        sleep(2)
