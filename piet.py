@@ -125,7 +125,9 @@ def runScript():
     twitterApi.postTweet()
 
 if __name__ == '__main__':
-    pietStyleCounter = int(input('Piet Counter'))
-    simpleArtCounter = int(input('Simple Art Counter'))
+    pietStyleCounter = int(input('Piet Counter: '))
+    simpleArtCounter = int(input('Simple Art Counter: '))
     status = ''
-    schedule.every(3).hours.do(runScript)
+
+    while True:
+        schedule.every(3).hours.do(runScript)
