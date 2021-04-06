@@ -72,7 +72,6 @@ class Piet:
         pietStyleCounter += 1
         image.save('image.jpg')
         status = f'Piet Style n. {pietStyleCounter}'
-        print(status)
 
     def createSimpleArt(self):
         from math import ceil
@@ -103,7 +102,6 @@ class Piet:
         simpleArtCounter += 1
         status = f'Simple Art n. {simpleArtCounter}'
         image.save(f'image.jpg')
-        print(status)
 
 class Twitter:
     def __init__(self):
@@ -112,9 +110,10 @@ class Twitter:
         self.api = tweepy.API(self.auth)
 
     def postTweet(self):
+        global status
         imagePath = 'image.jpg'
-        status = ''
         self.api.update_with_media(imagePath, status)
+        print(f'Post: {status}')
 
 def runScript():
     piet = Piet()
@@ -128,6 +127,8 @@ if __name__ == '__main__':
     pietStyleCounter = int(input('Piet Counter: '))
     simpleArtCounter = int(input('Simple Art Counter: '))
     status = ''
+    schedule.every(3).hours.do(runScript)
 
     while True:
-        schedule.every(3).hours.do(runScript)
+        schedule.run_pending()
+        sleep(1)
