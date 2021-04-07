@@ -4,42 +4,38 @@ from PIL import Image
 from random import randint, choice
 from tokens import *
 from time import sleep
-from math import floor
 
 class Piet:
     def createImageInPietStyle(self):
-        def splitVertical(self, fatherFrame):
-            lineToPaste = Image.new('RGB', (20, fatherFrame['height']), color = (0, 0, 0))
-            imageToPasteWidth = randint(100, fatherFrame['width'] - 100)
-            imageToPasteHeight = fatherFrame['height']
-            imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
-            image.paste(imageToPaste, fatherFrame['position'])
-            image.paste(lineToPaste, (fatherFrame['position'][0] + imageToPasteWidth - 10, fatherFrame['position'][1]))
-            descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth - 10, 'height': imageToPasteHeight}
-            descendent2 = {'position': (fatherFrame['position'][0] + imageToPasteWidth, fatherFrame['position'][1]), 'width': fatherFrame['width'] - imageToPasteWidth, 'height': imageToPasteHeight}
+        def split(self, fatherFrame, vertical):
+            if vertical:
+                lineToPaste = Image.new('RGB', (20, fatherFrame['height']), color = (0, 0, 0))
+                imageToPasteWidth = randint(100, fatherFrame['width'] - 100)
+                imageToPasteHeight = fatherFrame['height']
+                imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
+                image.paste(imageToPaste, fatherFrame['position'])
+                image.paste(lineToPaste, (fatherFrame['position'][0] + imageToPasteWidth - 10, fatherFrame['position'][1]))
+                descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth - 10, 'height': imageToPasteHeight}
+                descendent2 = {'position': (fatherFrame['position'][0] + imageToPasteWidth, fatherFrame['position'][1]), 'width': fatherFrame['width'] - imageToPasteWidth, 'height': imageToPasteHeight}
+            else:
+                lineToPaste = Image.new('RGB', (fatherFrame['width'], 20), color = (0, 0, 0))
+                imageToPasteWidth = fatherFrame['width']
+                imageToPasteHeight = randint(100, fatherFrame['height'] - 100)
+                imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
+                image.paste(imageToPaste, fatherFrame['position'])
+                image.paste(lineToPaste, (fatherFrame['position'][0], fatherFrame['position'][1] + imageToPasteHeight - 10))
+                descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth, 'height': imageToPasteHeight - 10}
+                descendent2 = {'position': (fatherFrame['position'][0], fatherFrame['position'][1] + imageToPasteHeight), 'width': imageToPasteWidth, 'height': fatherFrame['height'] - imageToPasteHeight}
+
             frames.append(descendent1)
             frames.append(descendent2)
             frames.remove(fatherFrame)
 
-        def splitHorizontal(self, fatherFrame):
-            lineToPaste = Image.new('RGB', (fatherFrame['width'], 20), color = (0, 0, 0))
-            imageToPasteWidth = fatherFrame['width']
-            imageToPasteHeight = randint(100, fatherFrame['height'] - 100)
-            imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
-            image.paste(imageToPaste, fatherFrame['position'])
-            image.paste(lineToPaste, (fatherFrame['position'][0], fatherFrame['position'][1] + imageToPasteHeight - 10))
-            descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth, 'height': imageToPasteHeight - 10}
-            descendent2 = {'position': (fatherFrame['position'][0], fatherFrame['position'][1] + imageToPasteHeight), 'width': imageToPasteWidth, 'height': fatherFrame['height'] - imageToPasteHeight}
-            frames.append(descendent1)
-            frames.append(descendent2)
-            frames.remove(fatherFrame)
-
-        def verifyFrames(self, frames):
+        def verifyFrames(self, frames, minimalSize):
             validFrames = list()
 
             for frame in frames:
-                if frame['width'] >= 300 and frame['height'] >= 300:
-                    validFrames.append(frame)
+                if frame['width'] >= minimalSize and frame['height'] >= minimalSize: validFrames.append(frame)
 
             return validFrames
 
@@ -49,23 +45,16 @@ class Piet:
 
         while True:
             try:
-                frames = verifyFrames(self, frames)
-
+                vertical = choice((True, False))
+                frames = verifyFrames(self, frames, 300)
                 activeFrame = choice(frames)
 
                 if activeFrame['width'] == activeFrame['height']:
-                    vertical = choice((True, False))
-                    if vertical and activeFrame['width'] > 300:
-                        splitVertical(self, activeFrame)
-                    else:
-                        splitHorizontal(self, activeFrame)
-                elif activeFrame['width'] > activeFrame['height']:
-                    splitVertical(self, activeFrame)
-                else:
-                    splitHorizontal(self, activeFrame)
-
-            except IndexError:
-                break
+                    if vertical and activeFrame['width'] > 300: split(self, activeFrame, vertical)
+                    else: split(self, activeFrame, vertical)
+                elif activeFrame['width'] > activeFrame['height']: split(self, activeFrame, vertical=True)
+                else: split(self, activeFrame, vertical=False)
+            except IndexError: break
 
         global pietStyleCounter
         global status
@@ -74,28 +63,38 @@ class Piet:
         status = f'Piet Style n. {pietStyleCounter}'
 
     def createSimpleArt(self):
-        from math import ceil
-        def drawSimpleArt(self, pos, width, height, image):
-            colors = [(105, 60, 114), (193, 80, 80), (217, 118, 66), (212, 157, 66)]
-            colorToPaint = choice(colors)
-            imageToPaste = Image.new('RGB', (width, height), color = colorToPaint)
-            image.paste(imageToPaste, pos)
+        def verifyFrames(frames):
+            validFrames = list()
 
-        width = 2000
-        height = 1500
-        horizontalPosition = 0
-        imageColor = (randint(0, 255), randint(0, 255), randint(0, 255))
-        image = Image.new('RGB', (width, height), color = imageColor)
-        drawSimpleArt(self, (horizontalPosition, 0), width, height, image)
+            for frame in frames:
+                if not frame['width'] < 70: validFrames.append(frame)
+
+            return validFrames
+
+        def splitVertical(fatherFrame):
+            imageToPasteWidth = randint(0, fatherFrame['width'])
+            imageToPasteHeight = fatherFrame['height']
+            imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
+            image.paste(imageToPaste, fatherFrame['position'])
+            descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth, 'height': imageToPasteHeight}
+            descendent2 = {'position': (fatherFrame['position'][0] + imageToPasteWidth, fatherFrame['position'][1]), 'width': fatherFrame['width'] - imageToPasteWidth, 'height': imageToPasteHeight}
+            imageToPasteWidth = descendent2['width']
+            imageToPasteHeight = descendent2['height']
+            image.paste(imageToPaste, descendent2['position'])
+            frames.append(descendent1)
+            frames.append(descendent2)
+            frames.remove(fatherFrame)
+
+        colors = [(105, 60, 114), (193, 80, 80), (217, 118, 66), (212, 157, 66)]
+        image = Image.new('RGB', (2000, 1500), color = (0, 0, 0))
+        frames = [{'position': (0, 0), 'width': 2000, 'height': 1500}]
 
         while True:
-            if width < 50:
-                drawSimpleArt(self, (2000 - width, 0), width, height, image)
-                break
-            split = randint(0, ceil(width / randint(2, 4)))
-            width -= split
-            horizontalPosition += split
-            drawSimpleArt(self, (horizontalPosition, 0), width, height, image)
+            try:
+                frames = verifyFrames(frames)
+                activeFrame = choice(frames)
+                splitVertical(activeFrame)
+            except IndexError: break
 
         global simpleArtCounter
         global status
@@ -120,15 +119,16 @@ def runScript():
     pietStyle = choice((True, False))
     if pietStyle: piet.createImageInPietStyle()
     else: piet.createSimpleArt()
-    twitterApi = Twitter()
-    twitterApi.postTweet()
+    # twitterApi = Twitter()
+    # twitterApi.postTweet()
 
 if __name__ == '__main__':
-    pietStyleCounter = int(input('Piet Counter: '))
-    simpleArtCounter = int(input('Simple Art Counter: '))
+    pietStyleCounter = 0#int(input('Piet Counter: '))
+    simpleArtCounter = 0#int(input('Simple Art Counter: '))
     status = ''
-    schedule.every(3).hours.do(runScript)
+    schedule.every(8).hours.do(runScript)
 
     while True:
-        schedule.run_pending()
+        # schedule.run_pending()
+        runScript()
         sleep(1)
