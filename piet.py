@@ -1,9 +1,10 @@
 import tweepy
 import schedule
-from PIL import Image
+from PIL import Image, ImageDraw
 from random import randint, choice
 from tokens import *
 from time import sleep
+
 
 class Piet:
     def createImageInPietStyle(self):
@@ -39,7 +40,6 @@ class Piet:
 
             return validFrames
 
-        colors = [(255, 0, 0), (255, 255, 255), (0, 0, 255), (244,203,2)]
         image = Image.new('RGB', (1500, 1500), color = choice(colors))
         frames = [{'position': (0, 0), 'width': 1500, 'height': 1500}]
 
@@ -60,7 +60,7 @@ class Piet:
         global status
         pietStyleCounter += 1
         image.save('image.jpg')
-        status = f'Piet Style n. {pietStyleCounter}'
+        status = f'Piet Style Art N. {pietStyleCounter}'
 
     def createSimpleArt(self):
         def verifyFrames(frames):
@@ -85,7 +85,6 @@ class Piet:
             frames.append(descendent2)
             frames.remove(fatherFrame)
 
-        colors = [(105, 60, 114), (193, 80, 80), (217, 118, 66), (212, 157, 66)]
         image = Image.new('RGB', (2000, 1500), color = (0, 0, 0))
         frames = [{'position': (0, 0), 'width': 2000, 'height': 1500}]
 
@@ -99,8 +98,43 @@ class Piet:
         global simpleArtCounter
         global status
         simpleArtCounter += 1
-        status = f'Simple Art n. {simpleArtCounter}'
+        status = f'Simple Art N. {simpleArtCounter}'
         image.save(f'image.jpg')
+
+    def createTiled(self):
+        def diagonalLines(self):
+            for x in range(0, 1500 + blockSize, blockSize):
+                for y in range(0, 1500 + blockSize, blockSize):
+                    diagonal = choice((True, False))
+
+                    if diagonal: ImageDraw.Draw(image).line((x, y) + (x + blockSize, y + blockSize), width = 5, fill=color1)
+                    else: ImageDraw.Draw(image).line((x, y + blockSize) + (x + blockSize, y), width = 5, fill=color2)
+
+        def horizontalLines(self):
+            for x in range(0, 1500 + blockSize, blockSize):
+                for y in range(0, 1500 + blockSize, blockSize):
+                    vertical = choice((True, False))
+
+                    if vertical: ImageDraw.Draw(image).line((x + (blockSize / 2), y) + (x + (blockSize / 2), y + blockSize), width = 5, fill=color1)
+                    else: ImageDraw.Draw(image).line((x, y + blockSize / 2) + (x + blockSize, y + blockSize / 2), width = 5, fill=color2)
+
+        backgroundColor = choice(((0, 0, 0), (59,31,82)))
+        blockSize = choice((20, 30, 50, 60))
+        color1 = choice(colors[0:2])
+        color2 = choice(colors[0:2])
+        image = Image.new('RGB', (1500, 1500), color = backgroundColor)
+        style = choice((1, 2))
+
+        if style == 1: diagonalLines(self)
+        elif style == 2: horizontalLines(self)
+
+        global tiledSStyleCounter
+        global status
+        tiledSStyleCounter += 1
+        status = f'Tiled Art N. {tiledSStyleCounter}'
+
+        image.save('image.jpg')
+
 
 class Twitter:
     def __init__(self):
@@ -112,23 +146,31 @@ class Twitter:
         global status
         imagePath = 'image.jpg'
         self.api.update_with_media(imagePath, status)
-        print(f'Post: {status}')
+
 
 def runScript():
     piet = Piet()
-    pietStyle = choice((True, False))
-    if pietStyle: piet.createImageInPietStyle()
-    else: piet.createSimpleArt()
-    # twitterApi = Twitter()
-    # twitterApi.postTweet()
+    artStyle = choice((1, 2, 3))
+    if artStyle == 1: piet.createImageInPietStyle()
+    elif artStyle == 2: piet.createSimpleArt()
+    else: piet.createTiled()
+    twitterApi = Twitter()
+    twitterApi.postTweet()
+    print(f'Post: {status}')
+
+def postOnTerminal():
+    print(f'Running again in the next {hours} hours.')
 
 if __name__ == '__main__':
-    pietStyleCounter = 0#int(input('Piet Counter: '))
-    simpleArtCounter = 0#int(input('Simple Art Counter: '))
+    colors = [(221,129,156), (160,89,135), (59,31,82), (30,20,43)]
+    hours = int(input('How many hours to wait? '))
+    pietStyleCounter = int(input('Piet Counter: '))
+    simpleArtCounter = int(input('Simple Art Counter: '))
+    tiledSStyleCounter = int(input('Tiled Style Counter: '))
     status = ''
-    schedule.every(8).hours.do(runScript)
+    schedule.every(hours).hours.do(runScript)
+    schedule.every(1).hours.do(postOnTerminal)
 
     while True:
-        # schedule.run_pending()
-        runScript()
+        schedule.run_pending()
         sleep(1)
