@@ -7,13 +7,17 @@ from time import sleep
 
 
 class Piet:
+    def __init__(self):
+        #self.colors = [(255, 5, 78), (160,89,135), (59,31,82), (30,20,43)]
+        self.colors = [(255, 5, 78), (160,89,135), (255, 31, 176), (30,20,43)]
+
     def createImageInPietStyle(self):
         def split(self, fatherFrame, vertical):
             if vertical:
                 lineToPaste = Image.new('RGB', (20, fatherFrame['height']), color = (0, 0, 0))
                 imageToPasteWidth = randint(100, fatherFrame['width'] - 100)
                 imageToPasteHeight = fatherFrame['height']
-                imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
+                imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(self.colors))
                 image.paste(imageToPaste, fatherFrame['position'])
                 image.paste(lineToPaste, (fatherFrame['position'][0] + imageToPasteWidth - 10, fatherFrame['position'][1]))
                 descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth - 10, 'height': imageToPasteHeight}
@@ -22,7 +26,7 @@ class Piet:
                 lineToPaste = Image.new('RGB', (fatherFrame['width'], 20), color = (0, 0, 0))
                 imageToPasteWidth = fatherFrame['width']
                 imageToPasteHeight = randint(100, fatherFrame['height'] - 100)
-                imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
+                imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(self.colors))
                 image.paste(imageToPaste, fatherFrame['position'])
                 image.paste(lineToPaste, (fatherFrame['position'][0], fatherFrame['position'][1] + imageToPasteHeight - 10))
                 descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth, 'height': imageToPasteHeight - 10}
@@ -40,7 +44,7 @@ class Piet:
 
             return validFrames
 
-        image = Image.new('RGB', (1500, 1500), color = choice(colors))
+        image = Image.new('RGB', (1500, 1500), color = choice(self.colors))
         frames = [{'position': (0, 0), 'width': 1500, 'height': 1500}]
 
         while True:
@@ -74,7 +78,7 @@ class Piet:
         def splitVertical(fatherFrame):
             imageToPasteWidth = randint(0, fatherFrame['width'])
             imageToPasteHeight = fatherFrame['height']
-            imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(colors))
+            imageToPaste = Image.new('RGB', (imageToPasteWidth, imageToPasteHeight), color = choice(self.colors))
             image.paste(imageToPaste, fatherFrame['position'])
             descendent1 = {'position': fatherFrame['position'], 'width': imageToPasteWidth, 'height': imageToPasteHeight}
             descendent2 = {'position': (fatherFrame['position'][0] + imageToPasteWidth, fatherFrame['position'][1]), 'width': fatherFrame['width'] - imageToPasteWidth, 'height': imageToPasteHeight}
@@ -85,6 +89,10 @@ class Piet:
             frames.append(descendent2)
             frames.remove(fatherFrame)
 
+        global simpleArtCounter
+        global status
+        simpleArtCounter += 1
+        status = f'Simple Art N. {simpleArtCounter}'
         image = Image.new('RGB', (2000, 1500), color = (0, 0, 0))
         frames = [{'position': (0, 0), 'width': 2000, 'height': 1500}]
 
@@ -95,43 +103,97 @@ class Piet:
                 splitVertical(activeFrame)
             except IndexError: break
 
-        global simpleArtCounter
-        global status
-        simpleArtCounter += 1
-        status = f'Simple Art N. {simpleArtCounter}'
         image.save(f'image.jpg')
 
     def createTiled(self):
-        def diagonalLines(self):
+        def tiledLines(self):
+            global tiledStyleCounter
+            global status
+            diagonalOrVertical = choice(('diagonal', 'vertical'))
+            blockSize = choice((50, 60))
+            color1 = choice(self.colors[0:2])
+            color2 = choice(self.colors[0:2])
+            tiledStyleCounter += 1
+            status = f'Tiled Lines N. {tiledStyleCounter}'
+
+            if diagonalOrVertical == 'diagonal':
+                for x in range(0, 1500 + blockSize, blockSize):
+                    for y in range(0, 1500 + blockSize, blockSize):
+                        diagonal = choice((True, False))
+                        teste = (x, y) + (x + blockSize, y + blockSize)
+
+                        if diagonal: ImageDraw.Draw(image).line(teste, width = 5, fill=color1)
+                        else: ImageDraw.Draw(image).line((x, y + blockSize) + (x + blockSize, y), width = 5, fill=color2)
+
+            else:
+                for x in range(0, 1500 + blockSize, blockSize):
+                    for y in range(0, 1500 + blockSize, blockSize):
+                        vertical = choice((True, False))
+                        teste = (x + (blockSize / 2), y) + (x + (blockSize / 2), y + blockSize)
+
+                        if vertical: ImageDraw.Draw(image).line(teste, width = 5, fill=color1)
+                        else: ImageDraw.Draw(image).line((x, y + blockSize / 2) + (x + blockSize, y + blockSize / 2), width = 5, fill=color2)
+
+
+        def tiledEdgesCurves(self):
+            from math import ceil
+            global tiledEdgesCurvesCounter
+            global status
+            color1 = choice(self.colors[0:2])
+            color2 = choice(self.colors[0:2])
+            blockSize = choice((50, 60))
+            width = blockSize
+            height = blockSize
+            lineSize = ceil(blockSize * 0.2)
+            tiledEdgesCurvesCounter += 1
+            status = f'Tiled Curves N. {tiledEdgesCurvesCounter}'
+
             for x in range(0, 1500 + blockSize, blockSize):
                 for y in range(0, 1500 + blockSize, blockSize):
-                    diagonal = choice((True, False))
+                    option = choice((True, False))
 
-                    if diagonal: ImageDraw.Draw(image).line((x, y) + (x + blockSize, y + blockSize), width = 5, fill=color1)
-                    else: ImageDraw.Draw(image).line((x, y + blockSize) + (x + blockSize, y), width = 5, fill=color2)
+                    if option:
+                        x1 = x + width - (width + width / 2) - (lineSize / 2)
+                        y1 = y + height / 2 - (lineSize / 2)
+                        x2 = x + width / 2 + (lineSize / 2)
+                        y2 = y + height + height / 2 + (lineSize / 2)
+                        x3 = x + width / 2 - (lineSize / 2)
+                        y3 = y + height / 2 * -1 - (lineSize / 2)
+                        x4 = x + width + (width / 2) + (lineSize / 2)
+                        y4 = y + height / 2 + (lineSize / 2)
+                        varStart1 = 270
+                        varEnd1 = 360
+                        varStart2 = 90
+                        varEnd2 = 180
+                    else:
+                        x1 = x + width / 2 * -1 - (lineSize / 2)
+                        y1 = y + height / 2 * -1 - (lineSize / 2)
+                        x2 = x + width / 2 + (lineSize / 2)
+                        y2 = y + height / 2 + (lineSize / 2)
+                        x3 = x + width / 2 - (lineSize / 2)
+                        y3 = y + height / 2 - (lineSize / 2)
+                        x4 = x + width + (width / 2) + (lineSize / 2)
+                        y4 = y + height + (height / 2) + (lineSize / 2)
+                        varStart1 = 0
+                        varEnd1 = 90
+                        varStart2 = 180
+                        varEnd2 = 270
 
-        def horizontalLines(self):
-            for x in range(0, 1500 + blockSize, blockSize):
-                for y in range(0, 1500 + blockSize, blockSize):
-                    vertical = choice((True, False))
+                    coordinates1 = (x1, y1, x2, y2)
+                    coordinates2 = (x3, y3, x4, y4)
+                    ImageDraw.Draw(image).arc(coordinates1, start=varStart1, end=varEnd1, width=lineSize, fill=color1)
+                    ImageDraw.Draw(image).arc(coordinates2, start=varStart2, end=varEnd2, width=lineSize, fill=color2)
 
-                    if vertical: ImageDraw.Draw(image).line((x + (blockSize / 2), y) + (x + (blockSize / 2), y + blockSize), width = 5, fill=color1)
-                    else: ImageDraw.Draw(image).line((x, y + blockSize / 2) + (x + blockSize, y + blockSize / 2), width = 5, fill=color2)
-
-        backgroundColor = choice(((0, 0, 0), (59,31,82)))
-        blockSize = choice((20, 30, 50, 60))
-        color1 = choice(colors[0:2])
-        color2 = choice(colors[0:2])
-        image = Image.new('RGB', (1500, 1500), color = backgroundColor)
         style = choice((1, 2))
 
-        if style == 1: diagonalLines(self)
-        elif style == 2: horizontalLines(self)
-
-        global tiledSStyleCounter
-        global status
-        tiledSStyleCounter += 1
-        status = f'Tiled Art N. {tiledSStyleCounter}'
+        if style == 1:
+            backgroundColor = choice(((0, 0, 0), (13, 6, 18)))
+            image = Image.new('RGB', (1500, 1500), color = backgroundColor)
+            tiledLines(self)
+        elif style == 2:
+            backgroundColor = choice(((0, 0, 0), (13, 6, 18)))
+            image = Image.new('RGB', (1500, 1500), color = backgroundColor)
+            tiledEdgesCurves(self)
 
         image.save('image.jpg')
 
@@ -162,11 +224,11 @@ def postOnTerminal():
     print(f'Running again in the next {hours} hours.')
 
 if __name__ == '__main__':
-    colors = [(221,129,156), (160,89,135), (59,31,82), (30,20,43)]
     hours = int(input('How many hours to wait? '))
     pietStyleCounter = int(input('Piet Counter: '))
     simpleArtCounter = int(input('Simple Art Counter: '))
-    tiledSStyleCounter = int(input('Tiled Style Counter: '))
+    tiledStyleCounter = int(input('Tiled Style Counter: '))
+    tiledEdgesCurvesCounter = 0
     status = ''
     schedule.every(hours).hours.do(runScript)
     schedule.every(1).hours.do(postOnTerminal)
