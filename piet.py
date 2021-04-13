@@ -1,5 +1,4 @@
 import tweepy
-import schedule
 from PIL import Image, ImageDraw
 from random import randint, choice
 from tokens import *
@@ -8,7 +7,6 @@ from time import sleep
 
 class Piet:
     def __init__(self):
-        #self.colors = [(255, 5, 78), (160,89,135), (59,31,82), (30,20,43)]
         self.colors = [(255, 5, 78), (160,89,135), (255, 31, 176), (30,20,43)]
 
     def createImageInPietStyle(self):
@@ -60,11 +58,8 @@ class Piet:
                 else: split(self, activeFrame, vertical=False)
             except IndexError: break
 
-        global pietStyleCounter
-        global status
-        pietStyleCounter += 1
         image.save('image.jpg')
-        status = f'Piet Style Art N. {pietStyleCounter}'
+        print('Piet Style Art Created')
 
     def createSimpleArt(self):
         def verifyFrames(frames):
@@ -89,10 +84,7 @@ class Piet:
             frames.append(descendent2)
             frames.remove(fatherFrame)
 
-        global simpleArtCounter
-        global status
-        simpleArtCounter += 1
-        status = f'Simple Art N. {simpleArtCounter}'
+        print('Simple Art Created')
         image = Image.new('RGB', (2000, 1500), color = (0, 0, 0))
         frames = [{'position': (0, 0), 'width': 2000, 'height': 1500}]
 
@@ -107,14 +99,11 @@ class Piet:
 
     def createTiled(self):
         def tiledLines(self):
-            global tiledStyleCounter
-            global status
             diagonalOrVertical = choice(('diagonal', 'vertical'))
             blockSize = choice((50, 60))
             color1 = choice(self.colors[0:2])
             color2 = choice(self.colors[0:2])
-            tiledStyleCounter += 1
-            status = f'Tiled Lines N. {tiledStyleCounter}'
+            print('Tiled Lines Created')
 
             if diagonalOrVertical == 'diagonal':
                 for x in range(0, 1500 + blockSize, blockSize):
@@ -137,16 +126,15 @@ class Piet:
 
         def tiledEdgesCurves(self):
             from math import ceil
-            global tiledEdgesCurvesCounter
-            global status
             color1 = choice(self.colors[0:2])
             color2 = choice(self.colors[0:2])
             blockSize = choice((50, 60))
             width = blockSize
             height = blockSize
             lineSize = ceil(blockSize * 0.2)
-            tiledEdgesCurvesCounter += 1
-            status = f'Tiled Curves N. {tiledEdgesCurvesCounter}'
+            filled = choice((True, False))
+            print('Tiled Curves Created')
+
 
             for x in range(0, 1500 + blockSize, blockSize):
                 for y in range(0, 1500 + blockSize, blockSize):
@@ -181,8 +169,13 @@ class Piet:
 
                     coordinates1 = (x1, y1, x2, y2)
                     coordinates2 = (x3, y3, x4, y4)
-                    ImageDraw.Draw(image).arc(coordinates1, start=varStart1, end=varEnd1, width=lineSize, fill=color1)
-                    ImageDraw.Draw(image).arc(coordinates2, start=varStart2, end=varEnd2, width=lineSize, fill=color2)
+
+                    if filled:
+                        ImageDraw.Draw(image).chord(coordinates1, start=varStart1, end=varEnd1, width=lineSize, fill=color1)
+                        ImageDraw.Draw(image).chord(coordinates2, start=varStart2, end=varEnd2, width=lineSize, fill=color2)
+                    else:
+                        ImageDraw.Draw(image).arc(coordinates1, start=varStart1, end=varEnd1, width=lineSize, fill=color1)
+                        ImageDraw.Draw(image).arc(coordinates2, start=varStart2, end=varEnd2, width=lineSize, fill=color2)
 
         style = choice((1, 2))
 
@@ -197,42 +190,14 @@ class Piet:
 
         image.save('image.jpg')
 
-
-class Twitter:
-    def __init__(self):
-        self.auth = tweepy.OAuthHandler(apiKey, apiKeySecret)
-        self.auth.set_access_token(accessToken, accessTokenSecret)
-        self.api = tweepy.API(self.auth)
-
-    def postTweet(self):
-        global status
-        imagePath = 'image.jpg'
-        self.api.update_with_media(imagePath, status)
-
-
 def runScript():
     piet = Piet()
     artStyle = choice((1, 2, 3))
     if artStyle == 1: piet.createImageInPietStyle()
     elif artStyle == 2: piet.createSimpleArt()
     else: piet.createTiled()
-    twitterApi = Twitter()
-    twitterApi.postTweet()
-    print(f'Post: {status}')
-
-def postOnTerminal():
-    print(f'Running again in the next {hours} hours.')
 
 if __name__ == '__main__':
-    hours = int(input('How many hours to wait? '))
-    pietStyleCounter = int(input('Piet Counter: '))
-    simpleArtCounter = int(input('Simple Art Counter: '))
-    tiledStyleCounter = int(input('Tiled Style Counter: '))
-    tiledEdgesCurvesCounter = 0
-    status = ''
-    schedule.every(hours).hours.do(runScript)
-    schedule.every(1).hours.do(postOnTerminal)
-
     while True:
-        schedule.run_pending()
+        runScript()
         sleep(1)
