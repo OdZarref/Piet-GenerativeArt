@@ -1,7 +1,5 @@
-import tweepy
 from PIL import Image, ImageDraw
 from random import randint, choice
-from tokens import *
 from time import sleep
 
 
